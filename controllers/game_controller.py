@@ -1,5 +1,6 @@
 # controllers/game_controller.py
 from models.game_state import GameState
+import random
 from utils.file_manager import save_game, load_game
 from config import DATA_FILE
 
@@ -15,7 +16,8 @@ class GameController:
         self.state.set_coins(data.get("coins", 0))
         self.state.set_click_power(data.get("click_power", 1))
         self.state.set_upgrades_bought(data.get("upgrades_bought", 0))
-        self.state.set_auto_clickers(data.get('auto_clickers', 0))
+        self.state.set_auto_clickers(data.get('auto_clickers', 0)),
+        self.state.set_crit_chance(data.get("crit_chance", 10))  
     
     def save(self) -> None:
         """Сохраняет игру"""
@@ -23,7 +25,8 @@ class GameController:
             "coins": self.state.get_coins(),
             "click_power": self.state.get_click_power(),
             "upgrades_bought": self.state.get_upgrades_bought(),
-            "auto_clickers": self.state.get_auto_clickers()
+            "auto_clickers": self.state.get_auto_clickers(),
+            "crit_chance": self.state.get_crit_chance()  
         }
         save_game(data, DATA_FILE)
     
@@ -42,7 +45,7 @@ class GameController:
         self.state.set_click_power(value)
         self.save()
         
-    def buy_click_upgrade(self, cost_upgrate: int) -> bool:
+    def buy_click_upgrade(self) -> bool:
         cost_upgrate = self.get_upgrade_cost()
         if self.state.get_coins() >= cost_upgrate:
             self.add_coins(-cost_upgrate)
@@ -83,4 +86,38 @@ class GameController:
         self.state.set_click_power(1)
         self.state.set_upgrades_bought(0)
         self.state.set_auto_clickers(0)
+        self.state.set_crit_chance(10)
         self.save()
+        
+    def get_crit_chance(self):
+        return self.state.get_crit_chance()
+    
+    def get_crit_multiplier(self) -> int:
+        return self.state.get_crit_multiplier()
+    
+    def get_crit_upgrade_cost(self) -> int:
+        base_cost = 200
+        upgrades = (self.state.get_crit_chance() - 10) // 5
+        return base_cost + upgrades * 100
+    
+    def buy_crit_upgrade(self) -> bool:
+        cost = self.get_crit_upgrade_cost()
+        if self.state.get_coins() >= cost:
+            self.state.add_coins(-cost)
+            self.state.upgrade_crit_chance(5)
+            self.save()
+            return True
+        return False
+    
+    def click(self) -> tuple:
+        base_gain = self.state.get_click_power()
+        is_crit = random.randint(1,100) <= self.state.get_crit_chance()
+        
+        if is_crit:
+            gain = base_gain * self.state.get_crit_multiplier()
+        else:
+            gain = base_gain
+            
+        self.state.add_coins(gain)
+        self.save()
+        return gain, is_crit

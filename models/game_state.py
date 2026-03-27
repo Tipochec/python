@@ -7,6 +7,8 @@ class GameState:
         self.cost_upgrate = 50
         self.upgrades_bought = 0
         self.auto_clickers = 0
+        self.crit_chance = 10
+        self.crit_multiplier = 10
     
     def add_coins(self, amount: int) -> None:
         self.coins += amount
@@ -46,3 +48,17 @@ class GameState:
     
     def set_auto_clickers(self, value: int) -> None:
         self.auto_clickers = value
+        
+
+
+    def get_crit_chance(self) -> int:
+        return self.crit_chance
+    
+    def get_crit_multiplier(self) -> int:
+        return self.crit_multiplier
+
+    def upgrade_crit_chance(self, amount: int) -> None:
+        self.crit_chance += amount
+
+    def set_crit_chance(self, value: int) -> None:
+        self.crit_chance = value

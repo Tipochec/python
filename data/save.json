@@ -1,6 +1,7 @@
 {
-    "coins": 431,
-    "click_power": 19,
-    "upgrades_bought": 18,
-    "auto_clickers": 8
+    "coins": 50169,
+    "click_power": 128,
+    "upgrades_bought": 127,
+    "auto_clickers": 120,
+    "crit_chance": 190
 }
