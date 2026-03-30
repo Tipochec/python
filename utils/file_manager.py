@@ -1,6 +1,20 @@
 # utils/file_manager.py
 import json
-import os
+import os, sys
+
+
+
+
+def resource_path(relative_path):
+    """Получить абсолютный путь к ресурсу, работает и для .exe и для скрипта"""
+    try:
+        # PyInstaller создает временную папку и хранит путь в _MEIPASS
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # Если запущено как скрипт, используем папку с файлом
+        base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+    return os.path.join(base_path, relative_path)
 
 def save_game(data: dict, filename: str) -> None:
     """Сохраняет данные игры в JSON файл"""

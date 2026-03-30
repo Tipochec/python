@@ -9,6 +9,7 @@ class GameState:
         self.auto_clickers = 0
         self.crit_chance = 10
         self.crit_multiplier = 10
+        self.unlocked_achievements = []
     
     def add_coins(self, amount: int) -> None:
         self.coins += amount
@@ -62,3 +63,17 @@ class GameState:
 
     def set_crit_chance(self, value: int) -> None:
         self.crit_chance = value
+        
+    
+    
+    def get_unlocked_achievements(self):
+        return self.unlocked_achievements
+        
+    def add_achievement(self, name: str) -> int:
+        if name not in self.unlocked_achievements:
+            self.unlocked_achievements.append(name)
+        
+    def has_achievement(self, name: str):
+        return name in self.unlocked_achievements
+        
+        

@@ -2,7 +2,7 @@
 from models.game_state import GameState
 import random
 from utils.file_manager import save_game, load_game
-from config import DATA_FILE
+from config import DATA_FILE, ACHIEVEMENTS
 
 
 class GameController:
@@ -14,10 +14,10 @@ class GameController:
         """Загружает сохранение"""
         data = load_game(DATA_FILE)
         self.state.set_coins(data.get("coins", 0))
-        self.state.set_click_power(data.get("click_power", 1))
-        self.state.set_upgrades_bought(data.get("upgrades_bought", 0))
+        self.state.set_click_power(data.get("click_power", 1)),
+        self.state.set_upgrades_bought(data.get("upgrades_bought", 0)),
         self.state.set_auto_clickers(data.get('auto_clickers', 0)),
-        self.state.set_crit_chance(data.get("crit_chance", 10))  
+        self.state.set_crit_chance(data.get("crit_chance", 10)),
     
     def save(self) -> None:
         """Сохраняет игру"""
@@ -26,7 +26,7 @@ class GameController:
             "click_power": self.state.get_click_power(),
             "upgrades_bought": self.state.get_upgrades_bought(),
             "auto_clickers": self.state.get_auto_clickers(),
-            "crit_chance": self.state.get_crit_chance()  
+            "crit_chance": self.state.get_crit_chance(),
         }
         save_game(data, DATA_FILE)
     
@@ -34,6 +34,7 @@ class GameController:
         """Добавляет монеты"""
         self.state.add_coins(amount)
         self.save()
+        return self.check_achievements("coins")
     
     def get_coins(self) -> int:
         return self.state.get_coins()
@@ -52,6 +53,7 @@ class GameController:
             self.state.set_click_power(self.state.get_click_power() + 1)
             self.state.add_upgrade()
             self.save()
+            self.check_achievements("upgrades")
             return True
         return False
     
@@ -69,6 +71,7 @@ class GameController:
             self.state.add_coins(-cost)
             self.state.add_auto_clicker()
             self.save()
+            self.check_achievements("auto_clickers")
             return True
         return False
     
@@ -121,3 +124,24 @@ class GameController:
         self.state.add_coins(gain)
         self.save()
         return gain, is_crit
+    
+    def check_achievements(self, event_type: str, value: int = None):
+         
+        
+        for key, ach in ACHIEVEMENTS.items():
+            if self.state.has_achievement(ach['name']):
+                continue
+            
+            if ach['type'] == event_type:
+                current_value = None
+                if event_type == 'coins':
+                    current_value = self.state.get_coins()
+                elif event_type == "upgrades":
+                    current_value = self.state.get_upgrades_bought()
+                elif event_type == "auto_clickers":
+                    current_value = self.state.get_auto_clickers()
+                    
+                if current_value is not None and current_value >= ach["target"]:
+                    self.state.add_achievement(ach["name"])
+                    return ach
+        return None

@@ -1,7 +1,9 @@
 # views/main_window.py
 import customtkinter as ctk
-import pygame
-from config import WINDOW_TITLE
+import pygame, os
+from config import WINDOW_TITLE, ACHIEVEMENTS
+from utils.file_manager import resource_path
+
 
 # Настройка темы
 ctk.set_appearance_mode("dark")
@@ -15,8 +17,10 @@ class MainWindow:
         # Инициализация звука
         pygame.mixer.init()
         try:
-            self.click_sound = pygame.mixer.Sound("assets/sounds/click.wav")
-            self.buy_sound = pygame.mixer.Sound("assets/sounds/applepay.wav")
+            click_path = resource_path(os.path.join("assets", "sounds", "click.wav"))
+            buy_path = resource_path(os.path.join("assets", "sounds", "applepay.wav"))
+            self.click_sound = pygame.mixer.Sound(click_path)
+            self.buy_sound = pygame.mixer.Sound(buy_path)
         except:
             print('Звук не найден')
             self.click_sound = None
@@ -120,7 +124,22 @@ class MainWindow:
         self.controller.add_passive_income()
         self.update_display() 
         self.window.after(3000, self.start_passive_timer)
-    
+        
+    def show_achievements(self):
+        unlocked = self.controller.state.get_unlocked_achievements()
+
+        if not unlocked:
+            text = "пока нет достижений"
+        else:
+            text = "Полученые достижения:\n" + "\n".join(unlocked)
+            
+        ach_window = ctk.CTkToplevel(self.window)
+        ach_window.title("Достижения")
+        ach_window.geometry("300x400")
+        
+        label = ctk.CTkLabel(ach_window, text=text, font=("Arial", 12))
+        label.pack(pady=20)
+        
     def create_widgets(self) -> None:
         """Создаёт все виджеты"""
         
@@ -164,6 +183,16 @@ class MainWindow:
             font=("Arial", 20, "bold")
         )
         self.label.pack(pady=10)
+        
+        # Отображение достижений
+        self.btn_achievements = ctk.CTkButton(
+            self.window,
+            text="Достижения",
+            command=self.show_achievements,
+            width=200,
+            fg_color="gray"
+        )
+        self.btn_achievements.pack(pady=5)
         
         # Отображение силы клика
         self.label_power = ctk.CTkLabel(
